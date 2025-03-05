@@ -24,3 +24,24 @@ def counting_fingers(handlandmarks):
             count+=1
     return count
 
+def main():
+    while capture.isOpened():
+        ret,frame=capture.read()
+        if not ret:
+            break
+        frameRGB=cv.cvtColor(frame,cv.COLOR_BGR2RGB)
+        faceResults=faceDetection.process(frameRGB)
+        if faceResults.detections:
+            for detection in faceResults.detections:
+                borderBox=detection.location_data.relative_bounding_box
+                rows,cols=frame.shape
+                x,y,w,h=int(borderBox.xmin*cols),int(borderBox.ymin*rows),int(borderBox.width*cols),int(borderBox.height*rows)
+                cv.rectangle(frame,(x,y),(x+w,y+h),(0,0,255),2)
+                
+
+
+
+
+if __name__=='__main__':
+    main()
+

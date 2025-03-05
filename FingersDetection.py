@@ -34,10 +34,26 @@ def main():
         if faceResults.detections:
             for detection in faceResults.detections:
                 borderBox=detection.location_data.relative_bounding_box
-                rows,cols=frame.shape
+                rows,cols,_=frame.shape
                 x,y,w,h=int(borderBox.xmin*cols),int(borderBox.ymin*rows),int(borderBox.width*cols),int(borderBox.height*rows)
                 cv.rectangle(frame,(x,y),(x+w,y+h),(0,0,255),2)
-                
+        handResults=hands.process(frameRGB)
+        if handResults.multi_hand_landmarks:
+            for handLandmarks in handResults.multi_hand_landmarks:
+                xmin,ymin,xmax,ymax=cols,rows,0,0
+                for landmrk in handLandmarks.landmark:
+                    x,y=int(landmrk.x*cols),int(landmrk.y*rows)
+                    xmin,ymin=min(x,xmin),min(y,ymin)
+                    xmax,ymax=max(x,xmax),max(y,ymax)
+                cv.rectangle(frame,(xmin,ymin),(xmax,ymax),(255,0,0),2)
+                fingerCount=counting_fingers(handLandmarks)
+                cv.putText(frame,f'Fingers:{fingerCount}',(xmin,ymin-10),cv.FONT_ITALIC,1,(255,255,255),2)
+                mpDrawing.draw_landmarks(frame,handLandmarks,mpHands.HAND_CONNECTIONS)
+        cv.imshow('Face and Hand Detection',frame)
+        if cv.waitKey(1) & 0xFF==ord('q'):
+            break
+    capture.release()
+    cv.destroyAllWindows()
 
 
 
